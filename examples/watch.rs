@@ -2,7 +2,7 @@ use etcd_rs::{Client, ClientConfig, KeyRange, KeyValueOp, Result, WatchInbound, 
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let cli = Client::connect(ClientConfig::new([
+    let cli = Client::new(ClientConfig::new([
         "http://127.0.0.1:12379".into(),
         "http://127.0.0.1:22379".into(),
         "http://127.0.0.1:32379".into(),
