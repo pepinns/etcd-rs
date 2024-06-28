@@ -1,6 +1,5 @@
 use std::time::Duration;
 
-use async_trait::async_trait;
 use tokio::sync::mpsc::channel;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{
@@ -251,11 +250,10 @@ impl Client {
     }
 }
 
-#[async_trait]
 impl AuthOp for Client {
     async fn authenticate<R>(&self, req: R) -> Result<AuthenticateResponse>
     where
-        R: Into<AuthenticateRequest> + Send,
+        R: Into<AuthenticateRequest>,
     {
         let req = tonic::Request::new(req.into().into());
         let resp = self.auth_client.clone().authenticate(req).await?;
@@ -264,11 +262,10 @@ impl AuthOp for Client {
     }
 }
 
-#[async_trait]
 impl KeyValueOp for Client {
     async fn put<R>(&self, req: R) -> Result<PutResponse>
     where
-        R: Into<PutRequest> + Send,
+        R: Into<PutRequest>,
     {
         let req = tonic::Request::new(req.into().into());
         let resp = self.kv_client.clone().put(req).await?;
@@ -278,7 +275,7 @@ impl KeyValueOp for Client {
 
     async fn get<R>(&self, req: R) -> Result<RangeResponse>
     where
-        R: Into<RangeRequest> + Send,
+        R: Into<RangeRequest>,
     {
         let req = tonic::Request::new(req.into().into());
         let resp = self.kv_client.clone().range(req).await?;
@@ -292,22 +289,22 @@ impl KeyValueOp for Client {
 
     async fn get_by_prefix<K>(&self, p: K) -> Result<RangeResponse>
     where
-        K: Into<Vec<u8>> + Send,
+        K: Into<Vec<u8>>,
     {
         self.get(KeyRange::prefix(p)).await
     }
 
     async fn get_range<F, E>(&self, from: F, end: E) -> Result<RangeResponse>
     where
-        F: Into<Vec<u8>> + Send,
-        E: Into<Vec<u8>> + Send,
+        F: Into<Vec<u8>>,
+        E: Into<Vec<u8>>,
     {
         self.get(KeyRange::range(from, end)).await
     }
 
     async fn delete<R>(&self, req: R) -> Result<DeleteResponse>
     where
-        R: Into<DeleteRequest> + Send,
+        R: Into<DeleteRequest>,
     {
         let req = tonic::Request::new(req.into().into());
         let resp = self.kv_client.clone().delete_range(req).await?;
@@ -321,22 +318,22 @@ impl KeyValueOp for Client {
 
     async fn delete_by_prefix<K>(&self, p: K) -> Result<DeleteResponse>
     where
-        K: Into<Vec<u8>> + Send,
+        K: Into<Vec<u8>>,
     {
         self.delete(KeyRange::prefix(p)).await
     }
 
     async fn delete_range<F, E>(&self, from: F, end: E) -> Result<DeleteResponse>
     where
-        F: Into<Vec<u8>> + Send,
-        E: Into<Vec<u8>> + Send,
+        F: Into<Vec<u8>>,
+        E: Into<Vec<u8>>,
     {
         self.delete(KeyRange::range(from, end)).await
     }
 
     async fn txn<R>(&self, req: R) -> Result<TxnResponse>
     where
-        R: Into<TxnRequest> + Send,
+        R: Into<TxnRequest>,
     {
         let req = tonic::Request::new(req.into().into());
         let resp = self.kv_client.clone().txn(req).await?;
@@ -346,7 +343,7 @@ impl KeyValueOp for Client {
 
     async fn compact<R>(&self, req: R) -> Result<CompactResponse>
     where
-        R: Into<CompactRequest> + Send,
+        R: Into<CompactRequest>,
     {
         let req = tonic::Request::new(req.into().into());
         let resp = self.kv_client.clone().compact(req).await?;
@@ -355,11 +352,10 @@ impl KeyValueOp for Client {
     }
 }
 
-#[async_trait]
 impl WatchOp for Client {
     async fn watch<R>(&self, req: R) -> Result<(WatchStream, WatchCanceler)>
     where
-        R: Into<WatchCreateRequest> + Send,
+        R: Into<WatchCreateRequest>,
     {
         let (tx, rx) = channel::<etcdserverpb::WatchRequest>(128);
 
@@ -392,11 +388,10 @@ impl WatchOp for Client {
     }
 }
 
-#[async_trait]
 impl LeaseOp for Client {
     async fn grant_lease<R>(&self, req: R) -> Result<LeaseGrantResponse>
     where
-        R: Into<LeaseGrantRequest> + Send,
+        R: Into<LeaseGrantRequest>,
     {
         let req = tonic::Request::new(req.into().into());
         let resp = self.lease_client.clone().lease_grant(req).await?;
@@ -405,7 +400,7 @@ impl LeaseOp for Client {
 
     async fn revoke<R>(&self, req: R) -> Result<LeaseRevokeResponse>
     where
-        R: Into<LeaseRevokeRequest> + Send,
+        R: Into<LeaseRevokeRequest>,
     {
         let req = tonic::Request::new(req.into().into());
         let resp = self.lease_client.clone().lease_revoke(req).await?;
@@ -443,7 +438,7 @@ impl LeaseOp for Client {
 
     async fn time_to_live<R>(&self, req: R) -> Result<LeaseTimeToLiveResponse>
     where
-        R: Into<LeaseTimeToLiveRequest> + Send,
+        R: Into<LeaseTimeToLiveRequest>,
     {
         let req = tonic::Request::new(req.into().into());
         let resp = self.lease_client.clone().lease_time_to_live(req).await?;
@@ -451,11 +446,10 @@ impl LeaseOp for Client {
     }
 }
 
-#[async_trait]
 impl ClusterOp for Client {
     async fn member_add<R>(&self, req: R) -> Result<MemberAddResponse>
     where
-        R: Into<MemberAddRequest> + Send,
+        R: Into<MemberAddRequest>,
     {
         let req = tonic::Request::new(req.into().into());
         let resp = self.cluster_client.clone().member_add(req).await?;
@@ -465,7 +459,7 @@ impl ClusterOp for Client {
 
     async fn member_remove<R>(&self, req: R) -> Result<MemberRemoveResponse>
     where
-        R: Into<MemberRemoveRequest> + Send,
+        R: Into<MemberRemoveRequest>,
     {
         let req = tonic::Request::new(req.into().into());
         let resp = self.cluster_client.clone().member_remove(req).await?;
@@ -475,7 +469,7 @@ impl ClusterOp for Client {
 
     async fn member_update<R>(&self, req: R) -> Result<MemberUpdateResponse>
     where
-        R: Into<MemberUpdateRequest> + Send,
+        R: Into<MemberUpdateRequest>,
     {
         let req = tonic::Request::new(req.into().into());
         let resp = self.cluster_client.clone().member_update(req).await?;

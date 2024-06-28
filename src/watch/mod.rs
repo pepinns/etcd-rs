@@ -4,10 +4,12 @@ mod watch;
 
 pub use watch::{WatchCancelRequest, WatchCreateRequest, WatchResponse};
 
-use std::pin::Pin;
-use std::task::{Context, Poll};
+use std::{
+    future::Future,
+    pin::Pin,
+    task::{Context, Poll},
+};
 
-use async_trait::async_trait;
 use futures::Stream;
 use tokio::sync::mpsc::Sender;
 use tonic::Streaming;
@@ -16,9 +18,8 @@ use crate::proto::etcdserverpb;
 use crate::proto::mvccpb;
 use crate::{Error, KeyValue, Result};
 
-#[async_trait]
 pub trait WatchOp {
-    async fn watch<R>(&self, req: R) -> Result<(WatchStream, WatchCanceler)>
+    fn watch<R>(&self, req: R) -> impl Future<Output = Result<(WatchStream, WatchCanceler)>>
     where
         R: Into<WatchCreateRequest> + Send;
 

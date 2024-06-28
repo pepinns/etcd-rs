@@ -14,7 +14,8 @@ pub use keep_alive::{LeaseKeepAliveRequest, LeaseKeepAliveResponse};
 pub use revoke::{LeaseRevokeRequest, LeaseRevokeResponse};
 pub use time_to_live::{LeaseTimeToLiveRequest, LeaseTimeToLiveResponse};
 
-use async_trait::async_trait;
+use std::future::Future;
+
 use tokio::sync::mpsc::Sender;
 use tonic::Streaming;
 
@@ -22,19 +23,18 @@ use crate::{Error, Result};
 
 pub type LeaseId = i64;
 
-#[async_trait]
 pub trait LeaseOp {
-    async fn grant_lease<R>(&self, req: R) -> Result<LeaseGrantResponse>
+    fn grant_lease<R>(&self, req: R) -> impl Future<Output = Result<LeaseGrantResponse>>
     where
         R: Into<LeaseGrantRequest> + Send;
 
-    async fn revoke<R>(&self, req: R) -> Result<LeaseRevokeResponse>
+    fn revoke<R>(&self, req: R) -> impl Future<Output = Result<LeaseRevokeResponse>>
     where
         R: Into<LeaseRevokeRequest> + Send;
 
-    async fn keep_alive_for(&self, lease_id: LeaseId) -> Result<LeaseKeepAlive>;
+    fn keep_alive_for(&self, lease_id: LeaseId) -> impl Future<Output = Result<LeaseKeepAlive>>;
 
-    async fn time_to_live<R>(&self, req: R) -> Result<LeaseTimeToLiveResponse>
+    fn time_to_live<R>(&self, req: R) -> impl Future<Output = Result<LeaseTimeToLiveResponse>>
     where
         R: Into<LeaseTimeToLiveRequest> + Send;
 }
