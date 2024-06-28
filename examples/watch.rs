@@ -1,4 +1,4 @@
-use etcd_rs::{Client, ClientConfig, KeyRange, KeyValueOp, Result, WatchInbound, WatchOp};
+use ya_etcd_rs::{Client, ClientConfig, KeyRange, KeyValueOp, Result, WatchInbound, WatchOp};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -9,10 +9,7 @@ async fn main() -> Result<()> {
     ]))
     .await?;
 
-    let (mut stream, cancel) = cli
-        .watch(KeyRange::prefix("foo"))
-        .await
-        .expect("watch by prefix");
+    let (mut stream, cancel) = cli.watch(KeyRange::prefix("foo")).await.expect("watch by prefix");
 
     tokio::spawn(async move {
         cli.put(("foo1", "1")).await.expect("put kv");
@@ -30,14 +27,14 @@ async fn main() -> Result<()> {
         match stream.inbound().await {
             WatchInbound::Ready(resp) => {
                 println!("receive event: {:?}", resp);
-            }
+            },
             WatchInbound::Interrupted(e) => {
                 eprintln!("encounter error: {:?}", e);
-            }
+            },
             WatchInbound::Closed => {
                 println!("watch stream closed");
                 break;
-            }
+            },
         }
     }
 

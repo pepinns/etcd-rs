@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use etcd_rs::{Client, ClientConfig, KeyRange, KeyValueOp, LeaseOp, PutRequest, Result};
+use ya_etcd_rs::{Client, ClientConfig, KeyRange, KeyValueOp, LeaseOp, PutRequest, Result};
 
 async fn put(cli: &Client) -> Result<()> {
     cli.put(("foo", "bar")).await.expect("put kv");

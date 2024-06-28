@@ -1,18 +1,41 @@
 [package]
-name = "etcd-rs"
-version = "1.0.1"
-authors = ["lodrem <jialun.cai@pm.me>"]
+name = "ya-etcd-rs"
+version = "1.1.0"
+authors = [
+    "lodrem <jialun.cai@pm.me>",
+    "fiekers <fikersfan@gmail.com>",
+    "diablur <diablur@gmail.com>",
+]
 edition = "2021"
 keywords = ["etcd", "future", "async"]
-repository = "https://github.com/lodrem/etcd-rs"
-homepage = "https://github.com/lodrem/etcd-rs"
+repository = "https://github.com/Fiekers/etcd-rs"
+homepage = "https://github.com/Fiekers/etcd-rs"
 description = "etcd client for rust"
-documentation = "https://docs.rs/etcd-rs"
+#documentation = "https://docs.rs/etcd-rs"
 license = "MIT"
-rust-version = "1.70"
+rust-version = "1.75"
+
+[lints.rust]
+dead_code = "allow"
+
+[lints.clippy]
+module_inception = "allow"
+
+[[example]]
+name = "kv"
+path = "examples/kv.rs"
+
+[[example]]
+name = "tls"
+path = "examples/tls.rs"
+required-features = ["tls"]
+
+[[example]]
+name = "watch"
+path = "examples/watch.rs"
 
 [features]
-default = ["tls"]
+default = []
 tls = ["tonic/tls", "tokio/fs"]
 
 [dependencies]
@@ -25,7 +48,7 @@ thiserror = "1.0"
 http = "0.2"
 
 [dev-dependencies]
-tokio = { version = "1.27", features = ["full"] }
+tokio = { version = "1.38", features = ["macros", "rt-multi-thread"] }
 
 [build-dependencies]
 tonic-build = "0.11"

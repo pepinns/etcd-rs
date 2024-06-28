@@ -36,31 +36,19 @@ use crate::{Error, Result};
 
 static MAX_RETRY: i32 = 3;
 
-#[cfg(feature = "tls")]
-#[derive(Debug, Clone)]
-enum TlsOption {
-    None,
-    WithConfig(tonic::transport::ClientTlsConfig),
-}
-
-#[cfg(not(feature = "tls"))]
-#[derive(Debug, Clone)]
-enum TlsOption {
-    None,
-}
-
 #[derive(Debug, Clone)]
 pub struct Endpoint {
     url: String,
-
-    tls_opt: TlsOption,
+    #[cfg(feature = "tls")]
+    tls_opt: Option<tonic::transport::ClientTlsConfig>,
 }
 
 impl Endpoint {
     pub fn new(url: impl Into<String>) -> Self {
         Self {
             url: url.into(),
-            tls_opt: TlsOption::None,
+            #[cfg(feature = "tls")]
+            tls_opt: None,
         }
     }
 
@@ -77,7 +65,7 @@ impl Endpoint {
         let certificate = Certificate::from_pem(ca_cert);
         let identity = Identity::from_pem(client_cert, client_key);
 
-        self.tls_opt = TlsOption::WithConfig(
+        self.tls_opt = Some(
             ClientTlsConfig::new()
                 .domain_name(domain_name)
                 .ca_certificate(certificate)
@@ -98,7 +86,6 @@ impl Endpoint {
         use tokio::fs::read;
 
         let ca_cert = read(ca_cert_path).await?;
-
         let client_cert = read(client_cert_path).await?;
         let client_key = read(client_key_path).await?;
 
@@ -113,7 +100,8 @@ where
     fn from(url: T) -> Self {
         Self {
             url: url.into(),
-            tls_opt: TlsOption::None,
+            #[cfg(feature = "tls")]
+            tls_opt: None,
         }
     }
 }
@@ -181,13 +169,18 @@ impl Client {
     async fn new_channel(cfg: &ClientConfig) -> Result<Channel> {
         let mut endpoints = Vec::with_capacity(cfg.endpoints.len());
         for e in cfg.endpoints.iter() {
-            let mut c = Channel::from_shared(e.url.clone())?
+            #[cfg(not(feature = "tls"))]
+            let c = Channel::from_shared(e.url.clone())?
                 .connect_timeout(cfg.connect_timeout)
                 .http2_keep_alive_interval(cfg.http2_keep_alive_interval);
 
             #[cfg(feature = "tls")]
+            let mut c = Channel::from_shared(e.url.clone())?
+                .connect_timeout(cfg.connect_timeout)
+                .http2_keep_alive_interval(cfg.http2_keep_alive_interval);
+            #[cfg(feature = "tls")]
             {
-                if let TlsOption::WithConfig(tls) = e.tls_opt.clone() {
+                if let Some(tls) = e.tls_opt.to_owned() {
                     c = c.tls_config(tls)?;
                 }
             }
@@ -257,7 +250,7 @@ impl Client {
         Fut: Future<Output = std::result::Result<R, Status>>,
         T: Clone,
     {
-        for _i in 1..MAX_RETRY {
+        for _i in 1..=MAX_RETRY {
             let mut new_req = tonic::Request::new(req.get_ref().clone());
             self.set_token(&mut new_req).await;
 

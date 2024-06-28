@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use etcd_rs::{Client, ClientConfig, KeyValueOp, Result};
+use ya_etcd_rs::{Client, ClientConfig, KeyValueOp, Result};
 use tokio::time::sleep;
 
 async fn put_with_sleep(cli: &Client, secs: u64) -> Result<()> {
