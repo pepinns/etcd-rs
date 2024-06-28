@@ -9,15 +9,16 @@ homepage = "https://github.com/lodrem/etcd-rs"
 description = "etcd client for rust"
 documentation = "https://docs.rs/etcd-rs"
 license = "MIT"
+rust-version = "1.70"
 
 [features]
 default = ["tls"]
 tls = ["tonic/tls", "tokio/fs"]
 
 [dependencies]
-tonic = "0.9"
-prost = "0.11"
-tokio = "1.27"
+tonic = "0.11"
+prost = "0.12"
+tokio = "1.38"
 tokio-stream = "0.1"
 futures = "0.3"
 thiserror = "1.0"
@@ -27,4 +28,4 @@ http = "0.2"
 tokio = { version = "1.27", features = ["full"] }
 
 [build-dependencies]
-tonic-build = "0.9"
+tonic-build = "0.11"
