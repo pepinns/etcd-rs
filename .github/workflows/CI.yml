@@ -55,7 +55,7 @@ jobs:
           - macos-latest
           - windows-latest
         toolchain:
-          - "1.75.0"  # minimum supported rust version
+          - "1.75.0" # minimum supported rust version
           - stable
           - nightly
     steps:
