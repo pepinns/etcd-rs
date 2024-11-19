@@ -361,6 +361,8 @@ impl Client {
                 Err(status) => {
                     if status.code() == tonic::Code::Unauthenticated {
                         self.refresh_token().await?;
+                    } else if status.code() == tonic::Code::Unavailable {
+                        continue;
                     } else {
                         return Err(Error::Response(status));
                     }
